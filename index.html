@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1" />
+  <meta name="theme-color" content="#05080d" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>NIGHTFALL — Freeflow Combat</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23071019'/%3E%3Cpath d='M6 22q10-6 18 2l8-12 8 12q8-8 18-2l-8 16-9-3-9 12-9-12-9 3z' fill='%238ce8ff'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas" aria-label="NIGHTFALL 3D freeflow combat game"></canvas>
+
+    <div class="vignette" aria-hidden="true"></div>
+    <div id="damage-vignette" aria-hidden="true"></div>
+    <div id="flash" aria-hidden="true"></div>
+    <div id="speedlines" aria-hidden="true"></div>
+    <div id="slowmo-tint" aria-hidden="true"></div>
+
+    <div id="hud" class="hidden">
+      <div class="hud-tl">
+        <div class="hero-badge" aria-hidden="true">
+          <svg viewBox="0 0 100 100"><path d="M50 13c-3 9-10 13-20 11-13-2-19 7-21 19 9-4 17-2 23 6 7 10 12 14 18 20 6-6 11-10 18-20 6-8 14-10 23-6-2-12-8-21-21-19-10 2-17-2-20-11Z"/><path class="cut" d="M50 36v18M35 42l8 9M65 42l-8 9"/></svg>
+        </div>
+        <div class="vitals">
+          <div class="nameplate"><span>NIGHTWATCH</span><span id="health-num">100</span></div>
+          <div class="health-track">
+            <div id="health-fill"></div>
+            <div class="health-ticks" aria-hidden="true"></div>
+          </div>
+          <div class="special-line">
+            <span>TAKEDOWN</span>
+            <div class="mini-meter"><div id="special-fill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="combo" class="hidden" aria-live="polite">
+        <span id="combo-num">0</span>
+        <div class="combo-meta"><span class="combo-x">×</span><span class="combo-word">COMBO</span></div>
+      </div>
+
+      <div class="hud-tr">
+        <div class="wave-plate">
+          <span class="eyebrow">WAVE</span>
+          <span id="wave-num">1</span><span class="slash">/</span><span id="wave-total">3</span>
+        </div>
+        <div id="enemy-dots" aria-label="Enemies remaining"></div>
+        <div class="score-line">SCORE <span id="score">0</span></div>
+        <div class="hud-icons">
+          <button id="sound-btn" class="icon-btn" aria-label="Toggle sound" aria-pressed="true">
+            <svg class="ico-on" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <svg class="ico-off" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m16 9 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <button id="pause-btn" class="icon-btn" aria-label="Pause">
+            <svg viewBox="0 0 24 24"><path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.4z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="counter-cue" class="hidden"><span class="cue-key">K</span><span class="cue-text">COUNTER</span></div>
+      <div id="toast" aria-live="polite"></div>
+
+      <div id="banner" class="hidden">
+        <div class="banner-kicker"></div>
+        <div class="banner-title"></div>
+        <div class="banner-sub"></div>
+      </div>
+
+      <div id="tutorial" class="hidden"></div>
+
+      <div id="joy-zone" aria-label="Movement joystick">
+        <div id="joy-base">
+          <div class="joy-cross" aria-hidden="true"></div>
+          <div id="joy-knob"></div>
+        </div>
+      </div>
+
+      <div id="actions">
+        <button id="btn-special" class="action act-special" aria-label="Takedown">
+          <span class="meter-ring" aria-hidden="true"></span>
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M27 4 12 27h10l-2 17 17-25H27l1-15Z"/></svg>
+          <span class="act-label">TAKEDOWN</span>
+        </button>
+        <button id="btn-counter" class="action act-counter" aria-label="Counter">
+          <span class="pulse-ring" aria-hidden="true"></span>
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 10 11v11c0 9 6 16 14 20 8-4 14-11 14-20V11L24 5Z"/><path d="m18 24 5 5 9-11" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="act-label">COUNTER</span>
+        </button>
+        <button id="btn-dodge" class="action act-dodge" aria-label="Dodge">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 15h16a13 13 0 0 1 0 26H16" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m18 7-9 8 9 8M12 33l-9 8 9 8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="act-label">DODGE</span>
+        </button>
+        <button id="btn-attack" class="action act-attack" aria-label="Strike">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 30c-4-4-4-12 2-16l7-4 4-7 4 9 5 1-1 8 7 5-7 7 1 8-9-2-5 6-6-8-7-1 5-6Z"/><path d="M24 12c-3 5-3 11 0 16M29 15c-2 4-2 9 0 13" fill="none" stroke="currentColor" stroke-width="2" stroke-opacity=".45"/></svg>
+          <span class="act-label">STRIKE</span>
+        </button>
+      </div>
+
+      <div id="rotate-hint" aria-hidden="true"><span>↻</span> ROTATE FOR A WIDER VIEW</div>
+    </div>
+
+    <div id="menu" class="screen">
+      <div class="menu-wash" aria-hidden="true"></div>
+      <div class="menu-bat" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><path d="M50 13c-3 9-10 13-20 11-13-2-19 7-21 19 9-4 17-2 23 6 7 10 12 14 18 20 6-6 11-10 18-20 6-8 14-10 23-6-2-12-8-21-21-19-10 2-17-2-20-11Z"/></svg>
+      </div>
+      <div class="menu-content">
+        <header class="brand">
+          <div class="brand-kicker"><span class="line"></span>A FREEFLOW COMBAT EXPERIENCE<span class="line"></span></div>
+          <h1 class="logo" aria-label="Nightfall"><span class="logo-night">NIGHT</span><span class="logo-fall">FALL</span></h1>
+          <p class="brand-sub">THE CITY SLEEPS. THE GUILTY DON'T.</p>
+        </header>
+
+        <div class="menu-actions">
+          <button id="start-btn" class="primary-btn" aria-label="Start">
+            <span class="btn-shine" aria-hidden="true"></span>
+            <span class="btn-main">ENTER THE NIGHT</span>
+            <span class="btn-sub">TAP OR CLICK TO BEGIN</span>
+          </button>
+          <div class="best">BEST SCORE <span id="best-score">0</span></div>
+        </div>
+
+        <div class="controls-card desktop-controls">
+          <div class="ctrl"><span class="ctrl-keys"><b>W</b><b>A</b><b>S</b><b>D</b></span><span>MOVE</span></div>
+          <div class="ctrl"><span class="ctrl-keys"><b>J</b></span><span>STRIKE</span></div>
+          <div class="ctrl"><span class="ctrl-keys"><b>K</b></span><span>COUNTER</span></div>
+          <div class="ctrl"><span class="ctrl-keys"><b>L</b></span><span>DODGE</span></div>
+          <div class="ctrl"><span class="ctrl-keys"><b>SPACE</b></span><span>TAKEDOWN</span></div>
+          <div class="ctrl"><span class="ctrl-keys"><b>DRAG</b></span><span>CAMERA</span></div>
+        </div>
+        <div class="controls-card touch-controls">
+          <div class="touch-row"><span class="touch-chip joystick-chip"></span><span>LEFT STICK TO MOVE</span></div>
+          <div class="touch-row"><span class="touch-chip"></span><span>STRIKE • COUNTER • DODGE</span></div>
+          <div class="touch-row"><span class="touch-chip"></span><span>DRAG THE SCENE TO LOOK</span></div>
+        </div>
+      </div>
+      <footer class="menu-footer">
+        <span>THREE.JS · WEBGL</span>
+        <span class="footer-rule"></span>
+        <span>HEADPHONES RECOMMENDED</span>
+      </footer>
+    </div>
+
+    <div id="pause-menu" class="screen hidden">
+      <div class="modal">
+        <div class="modal-kicker">THE NIGHT PAUSES</div>
+        <h2>PAUSED</h2>
+        <div class="modal-actions">
+          <button id="resume-btn" class="primary-btn compact"><span class="btn-main">RESUME</span></button>
+          <button id="restart-btn" class="ghost-btn">RESTART</button>
+          <button id="quit-btn" class="ghost-btn">MAIN MENU</button>
+        </div>
+        <div class="modal-hint">WASD MOVE · J STRIKE · K COUNTER · L DODGE · SPACE TAKEDOWN</div>
+      </div>
+    </div>
+
+    <div id="results" class="screen hidden">
+      <div class="modal results-modal">
+        <div class="modal-kicker" id="results-kicker">THE NIGHT IS YOURS</div>
+        <h2 id="results-title">CITY SAVED</h2>
+        <div class="results-grid">
+          <div class="result"><span>SCORE</span><b id="result-score">0</b></div>
+          <div class="result"><span>BEST COMBO</span><b id="result-combo">0</b></div>
+          <div class="result"><span>TIME</span><b id="result-time">0:00</b></div>
+        </div>
+        <div class="results-best" id="results-best">NEW BEST SCORE</div>
+        <div class="modal-actions">
+          <button id="again-btn" class="primary-btn compact"><span class="btn-main">FIGHT AGAIN</span></button>
+          <button id="results-menu-btn" class="ghost-btn">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="boot" class="boot">
+      <div class="boot-mark">
+        <svg viewBox="0 0 100 100"><path d="M50 13c-3 9-10 13-20 11-13-2-19 7-21 19 9-4 17-2 23 6 7 10 12 14 18 20 6-6 11-10 18-20 6-8 14-10 23-6-2-12-8-21-21-19-10 2-17-2-20-11Z"/></svg>
+      </div>
+      <div class="boot-text">NIGHTFALL</div>
+      <div class="boot-bar"><i></i></div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
