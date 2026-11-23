@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#101513" />
+  <title>CARPATHIAN RUN — Bucharest '99</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="game" aria-label="Carpathian Run open-world driving game">
+    <canvas id="world" aria-label="Bucharest street scene"></canvas>
+    <div class="vignette"></div>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">CR</span><div><strong>CARPATHIAN RUN</strong><small>BUCHAREST · 1999</small></div></div>
+      <div class="district"><span class="live-dot"></span><div><small>YOU ARE IN</small><strong id="districtName">TITAN DISTRICT</strong></div></div>
+      <div class="wallet"><span class="wallet-icon">◆</span><div><small>STASH</small><strong id="cash">₤ 1,250</strong></div></div>
+      <div class="heat"><div class="heat-label"><span>POLICE HEAT</span><strong id="heatText">COLD</strong></div><div class="heat-pips"><i></i><i></i><i></i><i></i><i></i></div></div>
+    </header>
+
+    <section class="mission-panel" id="missionPanel">
+      <div class="mission-kicker"><span class="mission-icon">✦</span><span id="missionType">FREE ROAM</span><span class="mission-status" id="missionStatus">CITY'S YOURS</span></div>
+      <h1 id="objectiveTitle">Make your own luck.</h1>
+      <p id="objectiveText">The city is awake. Find a job, hit the road, and keep your head down.</p>
+      <div class="mission-progress" id="progressWrap"><div class="progress-track"><i id="progressBar"></i></div><span id="progressLabel">NO ACTIVE JOB</span></div>
+      <div class="job-actions" id="jobActions">
+        <button class="job-button race" id="raceButton"><span class="job-symbol">↗</span><span><b>START A RACE</b><small>Beat the clock · 3 checkpoints</small></span><span class="job-arrow">→</span></button>
+        <button class="job-button heist" id="heistButton"><span class="job-symbol">◈</span><span><b>THE NIGHT JOB</b><small>Grab the goods · lose the heat</small></span><span class="job-arrow">→</span></button>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+    <div class="event-banner" id="eventBanner"></div>
+    <div class="route-tip" id="routeTip"><span class="keycap">E</span><span id="routeTipText">PRESS TO START</span></div>
+
+    <aside class="map-frame"><div class="map-heading"><span>SECTOR MAP</span><span class="map-compass">N ↑</span></div><canvas id="minimap" width="180" height="180"></canvas><div class="map-legend"><i></i> YOU <span>◆</span> ROUTE</div></aside>
+
+    <div class="speed-card"><div class="speed-top"><span>KM/H</span><span class="gear" id="gear">N</span></div><div class="speed-value" id="speed">000</div><div class="speed-track"><i id="speedBar"></i></div><div class="speed-footer"><span>TRABANT 601</span><span class="nitro-label" id="nitroLabel">NITRO <b>READY</b></span></div></div>
+
+    <div class="controls-hint"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> DRIVE</span><span><kbd>SPACE</kbd> HANDBRAKE</span><span><kbd>SHIFT</kbd> NITRO</span><span><kbd>E</kbd> INTERACT</span></div>
+
+    <div class="touch-controls" aria-label="Touch driving controls">
+      <div class="touch-steer"><button data-key="a" aria-label="Steer left">◀</button><button data-key="d" aria-label="Steer right">▶</button></div>
+      <div class="touch-pedals"><button data-key="w" aria-label="Accelerate">▲</button><button data-key="s" aria-label="Brake">▼</button></div>
+      <button class="touch-nitro" data-key="shift" aria-label="Nitro boost">N₂O</button>
+    </div>
+
+    <div class="intro" id="intro">
+      <div class="intro-card">
+        <div class="intro-eyebrow"><span></span> A CITY THAT NEVER PLAYS FAIR <span></span></div>
+        <div class="intro-title">CARPATHIAN<br><em>RUN</em><sup>™</sup></div>
+        <p class="intro-sub">BUCHAREST, ROMANIA · AUTUMN 1999</p>
+        <div class="intro-rule"></div>
+        <p class="intro-copy">The old town's full of fast money and bad ideas.<br>Pick a wheel. Make a name. Get out before dawn.</p>
+        <div class="intro-jobs">
+          <button id="introRace"><span class="intro-job-icon">↗</span><span><b>STREET RACE</b><small>3 checkpoints · ₤850 prize</small></span><span class="intro-go">→</span></button>
+          <button id="introHeist"><span class="intro-job-icon">◈</span><span><b>AFTER-HOURS JOB</b><small>Grab the satchel · ₤1,500 take</small></span><span class="intro-go">→</span></button>
+        </div>
+        <div class="intro-foot"><span>WASD / ARROWS TO DRIVE</span><span>SPACE TO DRIFT</span><span>SHIFT FOR NITRO</span></div>
+      </div>
+      <div class="intro-caption">A SMALL-TIME STORY IN A VERY BIG CITY <span>— PRESS A JOB TO BEGIN —</span></div>
+    </div>
+    <div class="fade-layer" id="fadeLayer"></div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
